@@ -1,2 +1,2 @@
 # DeadDrop
-CS598 clf MP1
+MP1 for CS598 clf
