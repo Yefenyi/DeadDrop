@@ -6,7 +6,8 @@ CYCLES measure_one_block_access_time(ADDR_PTR addr)
 {
 	CYCLES cycles;
 
-	asm volatile("mov %1, %%r8\n\t"
+	asm volatile(
+	"mov %1, %%r8\n\t"
 	"lfence\n\t"
 	"rdtsc\n\t"
 	"mov %%eax, %%edi\n\t"
@@ -21,4 +22,16 @@ CYCLES measure_one_block_access_time(ADDR_PTR addr)
 	return cycles;
 }
 
+
+void touch_address(ADDR_PTR addr)
+{
+	asm volatile(
+	"mov %0, %%r8\n\t"
+	"lfence\n\t"
+	"mov (%%r8), %%r8\n\t"
+	"lfence\n\t"
+	: /* blank */
+	: "r"(addr)
+	: "r8");
+}
 

@@ -18,5 +18,6 @@
 #define CYCLES uint32_t
 
 CYCLES measure_one_block_access_time(ADDR_PTR addr);
+void touch_address(ADDR_PTR addr);
 
 #endif
