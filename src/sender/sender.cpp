@@ -11,21 +11,30 @@ int main(int argc, char **argv)
 
 	bool sending = true;
 
-	size_t bufferSize = 1<<20;
+	size_t ways = 1;
+	size_t bufferSize = (1<<15) * ways;
 
-	char* array = (char*)malloc(bufferSize*sizeof(char));
+	char* array  = (char*)malloc(bufferSize * sizeof(char));
 
-	std::cout <<"allocated char array of "<< bufferSize <<std::endl;
+	for(int i=0; i<bufferSize; i++){
+		touch_address(ADDR_PTR(array+i));
+	}
 
-	std::cout << "Cycles used to access array[" <<size_t((1<<0)-1) << "]: " << measure_one_block_access_time(ADDR_PTR(&(array[0]))) << std::endl;
-	//std::cout << "Cycles used to access array[" <<size_t((1<<11)-1) << "]: " << measure_one_block_access_time(ADDR_PTR(&(array[(1<<11)-1]))) << std::endl;
-	std::cout << "Cycles used to access array[" <<size_t((1<<12)-1) << "]: " << measure_one_block_access_time(ADDR_PTR(&(array[(1<<12)-1]))) << std::endl;
 
-    for(int i=0; i<=20; i++){
-    	ADDR_PTR addr = ADDR_PTR(&(array[(1<<i)-1]));
+	size_t counter=0;
+	size_t maxMiss = 0;
 
-    	std::cout << "Cycles used to access array[" <<size_t((1<<i)-1) << "]: " << measure_one_block_access_time(addr) << std::endl;
-    }
+	while(true){
+		counter = 0;
+		for(int i=0; i<bufferSize; i+=(1<<11)){
+			if(measure_one_block_access_time(ADDR_PTR(array+i)) > 200){
+				counter++;
+				//std::cout<<(void*)(array+i)<<std::endl;
+			}
+		}
+		maxMiss = std::max(counter, maxMiss);
+		std::cout<< counter << std::endl << "\t" << maxMiss<<std::endl;
+	}
 	/*
 	while (sending) {
 		char text_buf[128];
