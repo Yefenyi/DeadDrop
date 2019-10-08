@@ -1,43 +1,48 @@
 #include"util.hpp"
-#include"sender.hpp"
-#include <iostream>
-#include <unistd.h>
 
 int main(int argc, char **argv)
 {
-	// Put your covert channel setup code here
+	int buffSize = 32 * 1024;
+	char sendBuff[buffSize];
+	uintptr_t writeTo[8];
+	char *ptr;
+
+	int idx = 0;
+	for (int i = 0; i < buffSize; i++) {
+		uintptr_t ptr = uintptr_t(&sendBuff[i]);
+		if (!(ptr & 0b111111111111)) {
+			printf("addr is %p\n", (void *)ptr);
+			writeTo[idx] = ptr;
+			idx++;
+		}
+	}
+
+	// return 0;
+
+	while(1) {
+		*((int *)writeTo[0]) = 1;
+		*((int *)writeTo[1]) = 1;
+		*((int *)writeTo[2]) = 1;
+		*((int *)writeTo[3]) = 1;
+		*((int *)writeTo[4]) = 1;
+		*((int *)writeTo[5]) = 1;
+		*((int *)writeTo[6]) = 1;
+		*((int *)writeTo[7]) = 1;
+	}
+
+	return 0;
 
 	printf("Please type a message.\n");
 
 	bool sending = true;
-
-	size_t bufferSize = 1<<20;
-
-	char* array = (char*)malloc(bufferSize*sizeof(char));
-
-	std::cout <<"allocated char array of "<< bufferSize <<std::endl;
-
-	std::cout << "Cycles used to access array[" <<size_t((1<<0)-1) << "]: " << measure_one_block_access_time(ADDR_PTR(&(array[0]))) << std::endl;
-	//std::cout << "Cycles used to access array[" <<size_t((1<<11)-1) << "]: " << measure_one_block_access_time(ADDR_PTR(&(array[(1<<11)-1]))) << std::endl;
-	std::cout << "Cycles used to access array[" <<size_t((1<<12)-1) << "]: " << measure_one_block_access_time(ADDR_PTR(&(array[(1<<12)-1]))) << std::endl;
-
-    for(int i=0; i<=20; i++){
-    	ADDR_PTR addr = ADDR_PTR(&(array[(1<<i)-1]));
-
-    	std::cout << "Cycles used to access array[" <<size_t((1<<i)-1) << "]: " << measure_one_block_access_time(addr) << std::endl;
-    }
-	/*
 	while (sending) {
-		char text_buf[128];
-		fgets(text_buf, sizeof(text_buf), stdin);
+		// char text_buf[128];
+		// fgets(text_buf, sizeof(text_buf), stdin);
 	
-		// Put your covert channel code here
+		// sendMessage(&text_buf);
 	}
 
 	printf("Sender finished.\n");
-	*/
 
 	return 0;
 }
-
-

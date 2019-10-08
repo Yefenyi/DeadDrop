@@ -1,25 +1,67 @@
-#include"util.hpp"
-#include"receiver.hpp"
+#include "util.hpp"
+
+float avg(int *ar, int len) {
+    int sum = 0;
+    for (int i = 0; i < len; i++){
+        sum += ar[i];
+    }
+
+    return float(sum) / float(len);
+}
 
 int main(int argc, char **argv)
 {
-	// Put your covert channel setup code here
+    // int testLen = 1000000;
+    int testLen = 1;
+    char a = 'a';
+    int buffSize = 32 * 1024 / 8;
+    char recieveBuff[buffSize];
+    int times[testLen];
+    // int times2[testLen];
+    int avgTimes[128 * 1024];
+    int time;
+    uintptr_t ptr;
 
-	printf("Please press enter.\n");
+    for (int i = 0; i < buffSize; i++) {
+        ptr = uintptr_t(&recieveBuff[i]);
+        if (!(ptr & 0b111111111111)) { 
+            printf("addr is %p\n", (void *)ptr);
+            // break;
+        }
+    }
 
-	char text_buf[2];
-	fgets(text_buf, sizeof(text_buf), stdin);
+    // return 0;
 
-	printf("Receiver now listening.\n");
+    // while(1) {
+    for (int i = 0; i < testLen; i++) {
+        times[i] = measure_one_block_access_time(ptr);
+        // times2[i] = measure_one_block_access_time(ptr+128);
+        // printf("time is %i\n", measure_one_block_access_time(ptr));
+    }
 
-	bool listening = true;
-	while (listening) {
+    printf("avg real is %f\n", avg(times, testLen));
+    // printf("avg other is %f\n", avg(times2, testLen));
 
-		// Put your covert channel code here
+    return 0;
 
-	}
+    printf("Please press enter.\n");
 
-	printf("Receiver finished.\n");
+    char text_buf[2];
+    fgets(text_buf, sizeof(text_buf), stdin);
 
-	return 0;
+    printf("Receiver now listening.\n");
+
+    bool listening = true;
+    while (listening) {
+        time = measure_one_block_access_time((long unsigned int)&a);
+        // fprintf(stderr, "%i\n", time);
+        // time = measure_one_block_access_time((long unsigned int)&b);
+        // fprintf(stderr, "%i\n", time);
+    }
+
+    printf("Receiver finished.\n");
+
+    return 0;
 }
+
+
