@@ -17,47 +17,53 @@ float avg(int *ar, int len) {
 int main(int argc, char **argv)
 {
 	register int start, end;
-	volatile int tmp;
+	int tmp;
 
 	const int cyclePeriod = 5000;
-	const int measureCt = 100000;
+	const int measureCt = 1000000;
 
-    int testLen = 1000000;
-    // int testLen = 1;
     int buffSize = 32 * 1024;
     char recieveBuff[buffSize];
     int times[measureCt];
-    // int times2[testLen];
-    // int time;
     ADDR_PTR ptr;
-	// const int setCt = 8;
-	// ADDR_PTR cacheSet[setCt];
 
+    int setCt = 8;
+    ADDR_PTR cacheSet[setCt];
+
+    int idx = 0;
 	for (int i = 0; i < buffSize; i++) {
 		ptr = ADDR_PTR(&recieveBuff[i]);
 		if (!(ptr & 0b111111111111)) {
 			printf("addr is %p\n", (void *)ptr);
-			// cacheSet[idx] = ptr;
-			// idx++;
-			break;
+			cacheSet[idx++] = ptr;
+			// break;
 		}
 	}
 
-    end = rdtsc();
+    // end = rdtsc();
     while(1) {
-    	// start = rdtsc();
-
-    	// for (int i = 0; i < measureCt; i++) {
-    	// 	tmp = *(int*)ptr;
-    	// }
-
-    	// end = rdtsc();
-    	// printf("avg time is %f\n", (end - start) / float(measureCt));
+    	start = rdtsc();
 
     	for (int i = 0; i < measureCt; i++) {
-    		times[i] = measure_one_block_access_time(ptr);
+            // printf("ptr is %p\n", ptr);
+            // tmp &= *(char*)ptr;
+            tmp &= *(char*)cacheSet[0];
+            tmp &= *(char*)cacheSet[1];
+            tmp &= *(char*)cacheSet[2];
+            tmp &= *(char*)cacheSet[3];
+            tmp &= *(char*)cacheSet[4];
+            tmp &= *(char*)cacheSet[5];
+            tmp &= *(char*)cacheSet[6];
+            tmp &= *(char*)cacheSet[7];
     	}
-    	printf("avg time is %f\n", avg(times, measureCt));
+
+    	end = rdtsc();
+    	printf("avg time is %f\n", (end - start) / float(measureCt));
+
+    	// for (int i = 0; i < measureCt; i++) {
+    	// 	times[i] = measure_one_block_access_time(ptr);
+    	// }
+    	// printf("avg time is %f\n", avg(times, measureCt));
 	}
 
     return 0;

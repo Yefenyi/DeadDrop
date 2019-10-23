@@ -1,56 +1,37 @@
 #include"util.hpp"
 
-typedef struct foo{
-	long long first;
-	long long second;
-	long long third;
-	long long fourth;
-	long long fifth;
-	long long sixth;
-	long long seventh;
-	long long eighth;
-} struct64;
-
-typedef struct bar{
-	long long array[8];
-} struct64_2;
-
 void busy_wait() {
 	for (int i = 0; i < 999999999; i++) {};
 }
 
 int main(int argc, char **argv)
 {
-	printf("%lu\n", sizeof(struct64));
-	printf("%lu\n", sizeof(struct64_2));
-
 	int buffSize = 32 * 1024;
-	char sendBuff[buffSize];
+	volatile char sendBuff[buffSize];
 	int writeCt = 8;
 	ADDR_PTR writeTo[writeCt];
 	char *ptr;
 
 	int idx = 0;
 	for (int i = 0; i < buffSize; i++) {
-		uintptr_t ptr = uintptr_t(&sendBuff[i]);
-		if (!(ptr & 0b111111111111) && idx < writeCt) {
+		ADDR_PTR ptr = ADDR_PTR(&sendBuff[i]);
+		if (!(ptr & 0b111111111111)) {
 			printf("addr %i is %p\n", idx, (void *)ptr);
-			writeTo[idx] = ptr;
-			idx++;
+			writeTo[idx++] = ptr;
 		}
 	}
 
 	while(1) {
 		printf("conflict!\n");
-		for(int i = 0; i < 300000000; i++) {
-			*((int *)writeTo[0]) = 4;
-			*((int *)writeTo[1]) = 4;
-			*((int *)writeTo[2]) = 4;
-			*((int *)writeTo[3]) = 4;
-			*((int *)writeTo[4]) = 4;
-			*((int *)writeTo[5]) = 4;
-			*((int *)writeTo[6]) = 4;
-			*((int *)writeTo[7]) = 4;
+		for(int i = 0; i < 70000000; i++) {
+			*((char *)writeTo[0]) = 0;
+			*((char *)writeTo[1]) = 0;
+			*((char *)writeTo[2]) = 0;
+			*((char *)writeTo[3]) = 0;
+			*((char *)writeTo[4]) = 0;
+			*((char *)writeTo[5]) = 0;
+			*((char *)writeTo[6]) = 0;
+			*((char *)writeTo[7]) = 0;
 			// flush(writeTo[0]);
 			// flush(writeTo[1]);
 			// flush(writeTo[2]);
@@ -61,23 +42,23 @@ int main(int argc, char **argv)
 			// flush(writeTo[7]);
 		}
 		printf("no conflict.\n");
-		for(int i = 0; i < 300000000; i++) {
-			*((int *)writeTo[0]+64) = 4;
-			*((int *)writeTo[1]+64) = 4;
-			*((int *)writeTo[2]+64) = 4;
-			*((int *)writeTo[3]+64) = 4;
-			*((int *)writeTo[4]+64) = 4;
-			*((int *)writeTo[5]+64) = 4;
-			*((int *)writeTo[6]+64) = 4;
-			*((int *)writeTo[7]+64) = 4;
-			// flush(writeTo[0]+64);
-			// flush(writeTo[1]+64);
-			// flush(writeTo[2]+64);
-			// flush(writeTo[3]+64);
-			// flush(writeTo[4]+64);
-			// flush(writeTo[5]+64);
-			// flush(writeTo[6]+64);
-			// flush(writeTo[7]+64);
+		for(int i = 0; i < 70000000*8; i++) {
+			*((char *)writeTo[0]+65) = 0;
+			// *((int *)writeTo[1]+128) = 4;
+			// *((int *)writeTo[2]+128) = 4;
+			// *((int *)writeTo[3]+128) = 4;
+			// *((int *)writeTo[4]+128) = 4;
+			// *((int *)writeTo[5]+128) = 4;
+			// *((int *)writeTo[6]+128) = 4;
+			// *((int *)writeTo[7]+128) = 4;
+			// flush(writeTo[0]+65);
+			// flush(writeTo[1]+128);
+			// flush(writeTo[2]+128);
+			// flush(writeTo[3]+128);
+			// flush(writeTo[4]+128);
+			// flush(writeTo[5]+128);
+			// flush(writeTo[6]+128);
+			// flush(writeTo[7]+128);
 		}		
 
 		// printf("writing to all sets\n");
