@@ -19,4 +19,10 @@
 
 CYCLES measure_one_block_access_time(ADDR_PTR addr);
 
+void flush(ADDR_PTR addr);
+
+void print_access_time(ADDR_PTR addr);
+
+unsigned long long rdtsc(void);
+
 #endif
