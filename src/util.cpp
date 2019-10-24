@@ -58,7 +58,7 @@ void BufferedWriter::write_one_char(char c){
 }
 
 void BufferedWriter::write_one_bit(bool b){
-    /*
-     your code goes here
-     */
-}
+        /*
+         your code goes here
+         */
+    }

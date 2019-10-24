@@ -14,11 +14,10 @@
 #ifndef UTIL_H_
 #define UTIL_H_
 
-using namespace std;
-
 #define ADDR_PTR uint64_t 
 #define CYCLES uint32_t
 
+using namespace std;
 CYCLES measure_one_block_access_time(ADDR_PTR addr);
 
 class BufferedReader{
@@ -32,8 +31,6 @@ public:
     void read(bool b);
 };
 
-char BufferedReader::start = 0b10101010;
-char BufferedReader::end = 0b11001100;
 
 class BufferedWriter{
 public:
@@ -48,8 +45,5 @@ private:
     void write_one_char(char c);   
     void write_one_bit(bool b);
 };
-
-char BufferedWriter::start = 0b10101010;
-char BufferedWriter::end = 0b11001100;
 
 #endif
