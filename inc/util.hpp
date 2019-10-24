@@ -15,7 +15,7 @@
 #define UTIL_H_
 
 #define ADDR_PTR uint64_t 
-#define CYCLES uint32_t
+#define CYCLES long long unsigned
 
 CYCLES measure_one_block_access_time(ADDR_PTR addr);
 
@@ -24,5 +24,7 @@ void flush(ADDR_PTR addr);
 void print_access_time(ADDR_PTR addr);
 
 unsigned long long rdtsc(void);
+
+long long unsigned getCycleEnd(long long unsigned start);
 
 #endif
