@@ -23,10 +23,9 @@ CYCLES measure_one_block_access_time(ADDR_PTR addr);
 class BufferedReader{
 public:
     int counter = 0;
-    char buffer = 0;
+    char buffer = 0;  
+    char start = 0b10101010;
     bool isReading = false;
-    static char start;
-    static char end;
     
     void read(bool b);
 };
@@ -34,8 +33,7 @@ public:
 
 class BufferedWriter{
 public:
-    static char start;
-    static char end;
+    char start = 0b10101010;
 
     BufferedWriter(char* text_buf):text_buf_(text_buf){} 
     void write();

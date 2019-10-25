@@ -23,32 +23,26 @@ CYCLES measure_one_block_access_time(ADDR_PTR addr)
 
 
 void BufferedReader::read(bool b){
-    buffer<<=1;
-    buffer|=b;
-    if(!isReading && buffer==BufferedReader::start){
-        cout<<"started"<<endl;
-        isReading=true;
+    buffer <<= 1;
+    buffer |= b;
+    if(!isReading && buffer==start){
+        //cout<<"started"<<endl;
+        isReading = true;
     }
     else if(isReading){
         (++counter)%=8;
         if(counter==0){
-            if(buffer==BufferedReader::end){
-                isReading = false;
-                cout<<endl<<"ended";
-            }
-            else{
-                cout<<buffer;
-            }
+        	isReading = false;
+            cout<<buffer;
         }
     }
 }
 
 void BufferedWriter::write(){
-    write_one_char(char(BufferedWriter::start));
     for(int i=0; i<127; i++){
+    	write_one_char(char(start));
         write_one_char(text_buf_[i]);
     }
-    write_one_char(char(BufferedWriter::end));
 }
 
 void BufferedWriter::write_one_char(char c){
