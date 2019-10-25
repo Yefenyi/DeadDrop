@@ -133,7 +133,7 @@ bool BufferedReader::getBit() {
     // read sent bit
     int result = doGetBit();
 
-    // printf("received %i in %lli\n", result, delay);
+    printf("received %i in %lli\n", result, delay);
 
     // wait for cycle to end
     while (rdtsc() < end) {}

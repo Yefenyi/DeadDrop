@@ -43,14 +43,14 @@ private:
     int counter = 0;
     char buffer = 0;
     bool isReading = false;
-    int measureCt = 1000;
+    int measureCt = 1000000;
 	char startByte = 0b10101010;
 	char endByte = 0b11001100;
 	ADDR_PTR *cacheSet;
 
 	// if 1s are turning to 0s, decrease.
 	// if 0s are turning to 1s, increase.
-	int cutoff = 46500000;
+	int cutoff = 50000000;
 };
 
 CYCLES measure_one_block_access_time(ADDR_PTR addr);
