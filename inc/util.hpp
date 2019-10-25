@@ -21,6 +21,7 @@ CYCLES measure_one_block_access_time(ADDR_PTR addr);
 
 #define cacheSize 32 * 1024
 #define ways 8
+#define channels 3
 
 class BufferedWriter{
 public:
@@ -31,7 +32,7 @@ public:
 
 private:
 	char startByte = 0b10101010;
-	ADDR_PTR *cacheSet;
+	ADDR_PTR *cacheSets;
     char* text_buf_;
 };
 
@@ -46,13 +47,14 @@ private:
     int counter = 0;
     char buffer = 0;
     bool isReading = false;
-    int measureCt = 1000000;
+    int measureCt = 1000;
 	char startByte = 0b10101010;
 	ADDR_PTR *cacheSet;
 
 	// if 1s are turning to 0s, decrease.
 	// if 0s are turning to 1s, increase.
-	int cutoff = 50000000;
+	// int cutoff = 50000000;
+	int cutoff = 50000;
 };
 
 CYCLES measure_one_block_access_time(ADDR_PTR addr);

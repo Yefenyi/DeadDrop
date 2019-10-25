@@ -37,7 +37,7 @@ CYCLES rdtsc() {
 // round starting time up to the nearst 2^x
 CYCLES getCycleEnd(CYCLES start) {
 	CYCLES end;
-	const int x = 28;
+	const int x = 19;
 
 	// add to ensure ending time is above the next threshold
     end = start + (1 << x) - 1;
@@ -47,9 +47,9 @@ CYCLES getCycleEnd(CYCLES start) {
     end <<= x; 
 
     // printf("  start is %llx\n", start);
-    // printf("min end is %llx\n", start+463000000);
+    // printf("min end is %llx\n", start+100000);
     // printf("    end is %llx\n", end);
-    // if (start + 463000000 < end) {
+    // if (start + 100000 < end) {
     //     printf("good!\n");
     // } else {
     //     printf("bad!\n");
@@ -98,7 +98,7 @@ bool BufferedReader::doGetBit() {
     end = rdtsc();
 
     delay = end - start;
-    // printf("started at %llu, ended at %llu\n", start, end);
+    // printf("started at %llx, ended at %llx\n", start, end);
     // printf("delay is %llu\n", delay);
 
     // if (delay > high) {
@@ -128,12 +128,12 @@ bool BufferedReader::getBit() {
     // printf("started %llx, ending %llx\n", start, end);
 
     //wait for a while, to give time for sender to send
-    while (rdtsc() < start + (cutoff * 0.1)) {}
+    while (rdtsc() < start + (cutoff << 3)) {}
 
     // read sent bit
     int result = doGetBit();
 
-    printf("received %i in %lli\n", result, delay);
+    // printf("received %i in %lli\n", result, delay);
 
     // wait for cycle to end
     while (rdtsc() < end) {}
@@ -142,6 +142,7 @@ bool BufferedReader::getBit() {
 }
 
 void BufferedWriter::write(){
+	write_one_bit(1);
     for(int i=0; i<127; i++){
         write_one_char(char(startByte));
         write_one_char(text_buf_[i]);
@@ -171,7 +172,7 @@ void BufferedWriter::write_one_bit(bool b){
 		while (rdtsc() < end) {
 			// write many times between calls to rdtsc,
 			// to make the channel more consistent
-			for(int i = 0; i < 100000; i++) {
+			for(int i = 0; i < 1000; i++) {
 				*((char *)cacheSet[0]) = 0;
 				*((char *)cacheSet[1]) = 0;
 				*((char *)cacheSet[2]) = 0;
@@ -186,6 +187,8 @@ void BufferedWriter::write_one_bit(bool b){
 		// printf("0\n");
 		while (rdtsc() < end) {}
 	}
+
+    // printf("actually ended %llx\n", rdtsc());
 }
 
 void BufferedReader::read(bool b){
