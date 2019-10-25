@@ -1,9 +1,17 @@
 #include"util.hpp"
 #include"receiver.hpp"
+#include <stdio.h>
+
+// CYCLES getBitRate() {
+//     doGetBit();
+//     printf("delay was %llu\n", delay);
+// }
 
 int main(int argc, char **argv)
 {
-	// Put your covert channel setup code here
+    BufferedReader reader(getCacheSet());
+
+    // getBitRate();
 
 	printf("Please press enter.\n");
 
@@ -14,12 +22,10 @@ int main(int argc, char **argv)
 
 	bool listening = true;
 	while (listening) {
-
-		// Put your covert channel code here
-
+        reader.read(reader.getBit());
 	}
 
-	printf("Receiver finished.\n");
+    printf("Receiver finished.\n");
 
 	return 0;
 }
