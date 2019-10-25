@@ -1,4 +1,3 @@
-
 // You may only use fgets() to pull input from stdin
 // You may use any print function to stdout to print 
 // out chat messages
@@ -17,39 +16,50 @@
 using namespace std;
 
 #define ADDR_PTR uint64_t 
-#define CYCLES uint32_t
+#define CYCLES long long int
 
-CYCLES measure_one_block_access_time(ADDR_PTR addr);
-
-class BufferedReader{
-public:
-    int counter = 0;
-    char buffer = 0;
-    bool isReading = false;
-    static char start;
-    static char end;
-    
-    void read(bool b);
-};
-
-char BufferedReader::start = 0b10101010;
-char BufferedReader::end = 0b11001100;
+#define cacheSize 32 * 1024
+#define ways 8
 
 class BufferedWriter{
 public:
-    static char start;
-    static char end;
-
-    BufferedWriter(char* text_buf):text_buf_(text_buf){} 
+    BufferedWriter(char* text_buf, ADDR_PTR *set): text_buf_(text_buf), cacheSet(set) {} 
     void write();
-
-private:
-    char* text_buf_;
     void write_one_char(char c);   
     void write_one_bit(bool b);
+
+private:
+	char startByte = 0b10101010;
+	char endByte = 0b11001100;
+	ADDR_PTR *cacheSet;
+    char* text_buf_;
 };
 
-char BufferedWriter::start = 0b10101010;
-char BufferedWriter::end = 0b11001100;
+class BufferedReader{
+public:
+    BufferedReader(ADDR_PTR *set): cacheSet(set) {} 
+    void read(bool b);
+    bool getBit();
+    bool doGetBit();
+private:
+    int counter = 0;
+    char buffer = 0;
+    bool isReading = false;
+    int measureCt = 1000;
+	char startByte = 0b10101010;
+	char endByte = 0b11001100;
+	ADDR_PTR *cacheSet;
+
+	// if 1s are turning to 0s, decrease.
+	// if 0s are turning to 1s, increase.
+	int cutoff = 46500000;
+};
+
+CYCLES measure_one_block_access_time(ADDR_PTR addr);
+CYCLES rdtsc();
+CYCLES getCycleEnd(CYCLES start);
+ADDR_PTR* getCacheSet();
+bool getBit();
+bool doGetBit();
 
 #endif

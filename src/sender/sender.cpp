@@ -1,18 +1,26 @@
-#include"util.hpp"
-#include"sender.hpp"
+#include "util.hpp"
+#include "sender.hpp"
 
 int main(int argc, char **argv)
 {
-	// Put your covert channel setup code here
+	ADDR_PTR* cacheSet = getCacheSet();
 
 	printf("Please type a message.\n");
 
 	bool sending = true;
 	while (sending) {
 		char text_buf[128];
+		BufferedWriter writer(text_buf, cacheSet);
 		fgets(text_buf, sizeof(text_buf), stdin);
-	
-		// Put your covert channel code here
+		// if (text_buf[0] == '0') {
+		// 	for (int i = 0; i < 10; i++)
+		// 		writer.write_one_bit(0);
+		// } else {
+		// 	for (int i = 0; i < 10; i++)
+		// 		writer.write_one_bit(1);
+		// }
+		writer.write();
+		printf("sent.\n");
 	}
 
 	printf("Sender finished.\n");
