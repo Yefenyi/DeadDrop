@@ -37,7 +37,7 @@ CYCLES rdtsc() {
 // round starting time up to the nearst 2^x
 CYCLES getCycleEnd(CYCLES start) {
 	CYCLES end;
-	const int x = 19;
+	const int x = 25;
 
 	// add to ensure ending time is above the next threshold
     end = start + (1 << x) - 1;
@@ -47,9 +47,9 @@ CYCLES getCycleEnd(CYCLES start) {
     end <<= x; 
 
     // printf("  start is %llx\n", start);
-    // printf("min end is %llx\n", start+100000);
+    // printf("min end is %llx\n", start+300000);
     // printf("    end is %llx\n", end);
-    // if (start + 100000 < end) {
+    // if (start + 300000 < end) {
     //     printf("good!\n");
     // } else {
     //     printf("bad!\n");
@@ -58,22 +58,28 @@ CYCLES getCycleEnd(CYCLES start) {
     return end;
 }
 
-ADDR_PTR* getCacheSet() {
+ADDR_PTR** getCacheSets() {
 	char *cacheBuff = new char[cacheSize];
-	ADDR_PTR *cacheSet = new ADDR_PTR[ways];
+	ADDR_PTR** cacheSets = new ADDR_PTR*[channels];
 
-	// Find addresses where last 12 bits == 0
-	ADDR_PTR ptr, mask = (1<<12)-1;
-	int idx = 0;
-	for (int i = 0; i < cacheSize; i++) {
-		ptr = ADDR_PTR(&cacheBuff[i]);
-		if (!(ptr & mask)) {
-			printf("Set addr %i is %p\n", idx, (void *)ptr);
-			cacheSet[idx++] = ptr;
+	// Cache set determined by last 12 bits
+	ADDR_PTR ptr, mask;
+	for (int channel = 0; channel < channels; channel++) {
+		// mask =  (1<<12)-1
+		cacheSets[channel] = new ADDR_PTR[ways];
+		int idx = 0;
+		for (int i = 0; i < cacheSize; i++) {
+			ptr = ADDR_PTR(&cacheBuff[i]);
+			// if last 6 bits are 0
+			if ((ptr == (ptr >> 6) << 6) && ((ptr >> 6) & 0b111111) == channel) {
+			// if (!(ptr & mask)) {
+				printf("Set %i addr %i is %p\n", channel, idx, (void *)ptr);
+				cacheSets[channel][idx++] = ptr;
+			}
 		}
 	}
 
-	return cacheSet;
+	return cacheSets;
 }
 
 // Measures a 1 or 0 by timing <measureCt> accesses. 
@@ -81,34 +87,29 @@ bool BufferedReader::doGetBit() {
     register CYCLES start, end;
     int volatile tmp;
     int result;
+    int results[channels];
 
     start = rdtsc();
 
     for (int i = 0; i < measureCt; i++) {
-        tmp &= *(char*)cacheSet[0];
-        tmp &= *(char*)cacheSet[1];
-        tmp &= *(char*)cacheSet[2];
-        tmp &= *(char*)cacheSet[3];
-        tmp &= *(char*)cacheSet[4];
-        tmp &= *(char*)cacheSet[5];
-        tmp &= *(char*)cacheSet[6];
-        tmp &= *(char*)cacheSet[7];
+    	int channel = 0;
+    	for (int channel = 0; channel < channels; channel++){
+	        tmp &= *(char*)cacheSets[channel][0];
+	        tmp &= *(char*)cacheSets[channel][1];
+	        tmp &= *(char*)cacheSets[channel][2];
+	        tmp &= *(char*)cacheSets[channel][3];
+	        tmp &= *(char*)cacheSets[channel][4];
+	        tmp &= *(char*)cacheSets[channel][5];
+	        tmp &= *(char*)cacheSets[channel][6];
+	        tmp &= *(char*)cacheSets[channel][7];
+	    }
     }
 
     end = rdtsc();
 
     delay = end - start;
     // printf("started at %llx, ended at %llx\n", start, end);
-    // printf("delay is %llu\n", delay);
-
-    // if (delay > high) {
-    //     high = delay;
-    //     printf("new high: %llu\n", high);
-    // }
-    // if (delay < low) {
-    //     low = delay;
-    //     printf("new low: %llu\n", low);
-    // }
+    // printf("delay is %llx or %llu\n", delay, delay);
 
     if (delay > cutoff) {
         return 1;
@@ -120,6 +121,7 @@ bool BufferedReader::doGetBit() {
 // Reads a 1 or 0, then waits for the period to end.
 bool BufferedReader::getBit() {
     CYCLES start, end;
+    bool good = false;
 
     // calculate start and end of cycle
     start = rdtsc();
@@ -136,7 +138,13 @@ bool BufferedReader::getBit() {
     // printf("received %i in %lli\n", result, delay);
 
     // wait for cycle to end
-    while (rdtsc() < end) {}
+    while (rdtsc() < end) {
+    	good = 1;
+    }
+
+    if (!good) {
+    	printf("you clipped the inner loop! shame!\n");
+    }
 
     return result;
 }
@@ -156,6 +164,7 @@ void BufferedWriter::write_one_char(char c){
 	printf("sending %c\n", c);
     for(int offset=7; offset>=0; offset--){
         write_one_bit(c&(1<<offset));
+        // while(1){write_one_bit(0);write_one_bit(1);}
     }
 }
 
@@ -173,14 +182,16 @@ void BufferedWriter::write_one_bit(bool b){
 			// write many times between calls to rdtsc,
 			// to make the channel more consistent
 			for(int i = 0; i < 1000; i++) {
-				*((char *)cacheSet[0]) = 0;
-				*((char *)cacheSet[1]) = 0;
-				*((char *)cacheSet[2]) = 0;
-				*((char *)cacheSet[3]) = 0;
-				*((char *)cacheSet[4]) = 0;
-				*((char *)cacheSet[5]) = 0;
-				*((char *)cacheSet[6]) = 0;
-				*((char *)cacheSet[7]) = 0;
+				for (int channel = 0; channel < channels; channel++) {
+					*((char *)cacheSets[channel][0]) = 0;
+					*((char *)cacheSets[channel][1]) = 0;
+					*((char *)cacheSets[channel][2]) = 0;
+					*((char *)cacheSets[channel][3]) = 0;
+					*((char *)cacheSets[channel][4]) = 0;
+					*((char *)cacheSets[channel][5]) = 0;
+					*((char *)cacheSets[channel][6]) = 0;
+					*((char *)cacheSets[channel][7]) = 0;
+				}
 			}
 		}
 	} else {
@@ -202,6 +213,7 @@ void BufferedReader::read(bool b){
         if(counter==0){
         	isReading = false;
             cout<<buffer<<std::flush;
+            buffer = 0;
         }
     }
 }

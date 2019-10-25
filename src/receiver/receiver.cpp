@@ -9,7 +9,7 @@
 
 int main(int argc, char **argv)
 {
-    BufferedReader reader(getCacheSet());
+    BufferedReader reader(getCacheSets());
 
     // getBitRate();
 

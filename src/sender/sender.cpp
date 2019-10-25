@@ -3,14 +3,14 @@
 
 int main(int argc, char **argv)
 {
-	ADDR_PTR* cacheSet = getCacheSet();
+	ADDR_PTR** cacheSets = getCacheSets();
 
 	printf("Please type a message.\n");
 
 	bool sending = true;
 	while (sending) {
 		char text_buf[128];
-		BufferedWriter writer(text_buf, cacheSet);
+		BufferedWriter writer(text_buf, cacheSets);
 		fgets(text_buf, sizeof(text_buf), stdin);
 		// if (text_buf[0] == '0') {
 		// 	for (int i = 0; i < 10; i++)
