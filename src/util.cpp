@@ -43,8 +43,8 @@ CYCLES getCycleEnd(CYCLES start) {
     end = start + (1 << x) - 1;
 
 	// zero out last bits to round back down
-    end >>= x;
-    end <<= x; 
+    end >>= x-1;
+    end <<= x-1; 
 
     // printf("  start is %llx\n", start);
     // printf("min end is %llx\n", start+300000);
@@ -130,7 +130,7 @@ bool BufferedReader::getBit() {
     // printf("started %llx, ending %llx\n", start, end);
 
     //wait for a while, to give time for sender to send
-    while (rdtsc() < start + (cutoff << 3)) {}
+    while (rdtsc() < start + (cutoff >> 3)) {}
 
     // read sent bit
     int result = doGetBit();
@@ -152,6 +152,7 @@ bool BufferedReader::getBit() {
 void BufferedWriter::write(){
 	write_one_bit(1);
     for(int i=0; i<127; i++){
+        write_one_char(char(junk));
         write_one_char(char(startByte));
         write_one_char(text_buf_[i]);
         if (text_buf_[i] == '\n')
@@ -212,6 +213,7 @@ void BufferedReader::read(bool b){
         (++counter)%=8;
         if(counter==0){
         	isReading = false;
+        	buffer &= ~(1<<7); // 8th bit is always 0. Eliminates 1/8th of our errors!
             cout<<buffer<<std::flush;
             buffer = 0;
         }

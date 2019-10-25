@@ -32,6 +32,7 @@ public:
 
 private:
 	char startByte = 0b11111111;
+	char junk = 0b11001100;
 	ADDR_PTR** cacheSets;
     char* text_buf_;
 };
@@ -48,7 +49,7 @@ private:
     char buffer = 0;
     bool isReading = false;
     // int measureCt = 1000;
-    int measureCt = 1000;
+    int measureCt = 10000;
 	// char startByte = 0b10101010;
 	char startByte = 0b11111111;
 	ADDR_PTR** cacheSets;
@@ -57,7 +58,8 @@ private:
 	// if 0s are turning to 1s, increase.
 	// int cutoff = 50000;
 	// int cutoff = 490000; // 7 channels
-	int cutoff = 1100000; // 16 channels
+	// int cutoff = 1100000; // 16 channels
+	int cutoff = 10300000; // 16 channels, 10k measureCt
 };
 
 CYCLES measure_one_block_access_time(ADDR_PTR addr);
