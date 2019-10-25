@@ -32,7 +32,7 @@ public:
 
 private:
 	char startByte = 0b10101010;
-	ADDR_PTR *cacheSet;
+	ADDR_PTR *cacheSets;
     char* text_buf_;
 };
 
