@@ -1,5 +1,7 @@
 #include "util.hpp"
 
+using namespace std;
+
 CYCLES delay;
 
 /* Measure the time it takes to access a block with virtual address addr. */

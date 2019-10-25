@@ -13,9 +13,7 @@
 #ifndef UTIL_H_
 #define UTIL_H_
 
-using namespace std;
-
-#define ADDR_PTR uint64_t 
+#define ADDR_PTR uint64_t
 #define CYCLES long long int
 
 #define cacheSize 32 * 1024
