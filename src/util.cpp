@@ -150,9 +150,9 @@ bool BufferedReader::getBit() {
 }
 
 void BufferedWriter::write(){
-	write_one_bit(1);
+	// write_one_bit(1);
+    write_one_char(char(junk));
     for(int i=0; i<127; i++){
-        write_one_char(char(junk));
         write_one_char(char(startByte));
         write_one_char(text_buf_[i]);
         if (text_buf_[i] == '\n')
